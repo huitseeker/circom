@@ -1654,7 +1654,7 @@ mod tests {
     use super::*;
     use std::io::{BufRead, BufReader, BufWriter, Write};
     use std::path::Path;
-    const LOCATION: &'static str = "../target/code_generator_test";
+    const LOCATION: &'static str = "../target/wasm_code_generator_test";
 
     fn create_producer() -> WASMProducer {
         WASMProducer::default()

@@ -993,7 +993,7 @@ mod tests {
     use std::path::Path;
     //    use std::fs::File;
     use super::*;
-    const LOCATION: &'static str = "../target/code_generator_test";
+    const LOCATION: &'static str = "../target/c_code_generator_test";
 
     fn create_producer() -> CProducer {
         CProducer::default()
