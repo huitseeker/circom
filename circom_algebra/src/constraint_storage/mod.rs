@@ -32,11 +32,9 @@ impl ConstraintStorage {
     }
 
     pub fn read_constraint(&self, id: ConstraintID) -> Option<C> {
-        if id < self.constraints.len() {
-            Some(logic::decode_constraint(&self.constraints[id], &self.field_tracker))
-        } else {
-            None
-        }
+        (id < self.constraints.len()).then(|| 
+            logic::decode_constraint(&self.constraints[id], &self.field_tracker)
+        )
     }
 
     pub fn replace(&mut self, id: ConstraintID, new: C) {

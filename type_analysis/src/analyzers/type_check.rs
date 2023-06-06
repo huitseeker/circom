@@ -74,10 +74,8 @@ pub fn type_check(program_archive: &ProgramArchive) -> Result<OutInfo, ReportCol
     let initial_expression = program_archive.get_main_expression();
     let type_analysis_response =
         type_expression(initial_expression, program_archive, &mut analysis_information);
-    let first_type = if let Result::Ok(t) = type_analysis_response {
-        t
-    } else {
-        return Result::Err(analysis_information.reports);
+    let Result::Ok(first_type) = type_analysis_response else {
+         return Result::Err(analysis_information.reports); 
     };
     if !first_type.is_template() {
         add_report(
@@ -593,10 +591,8 @@ fn type_expression(
                 type_expression(if_false, program_archive, analysis_information);
             let if_true_type = if_true_response?;
 
-            let cond_type = if let Result::Ok(f) = cond_response {
-                f
-            } else {
-                return Result::Ok(if_true_type);
+            let Result::Ok(cond_type) = cond_response else { 
+                return Result::Ok(if_true_type); 
             };
             if cond_type.is_template(){
                 add_report(
@@ -613,9 +609,7 @@ fn type_expression(
                 )
             }
 
-            let if_false_type = if let Result::Ok(f) = if_false_response {
-                f
-            } else {
+            let Result::Ok(if_false_type) = if_false_response else {
                 return Result::Ok(if_true_type);
             };
             if !FoldedType::same_type(&if_true_type, &if_false_type) {

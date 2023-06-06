@@ -34,11 +34,7 @@ where
     }
 
     pub fn get_constant(&self, id: CID) -> Option<&C> {
-        if id < self.constants.len() {
-            Some(&self.constants[id])
-        } else {
-            None
-        }
+        (id < self.constants.len()).then(|| &self.constants[id])
     }
 
     pub fn next_id(&self) -> CID {

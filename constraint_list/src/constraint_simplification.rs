@@ -445,7 +445,7 @@ pub fn simplification(smp: &mut Simplifier) -> (ConstraintStorage, SignalMap) {
     use std::time::SystemTime;
 
     let mut substitution_log =
-        if smp.port_substitution { Some(SubstitutionJSON::new(SUB_LOG).unwrap()) } else { None };
+        (smp.port_substitution).then(|| SubstitutionJSON::new(SUB_LOG).unwrap());
     let apply_linear = !smp.flag_s;
     let use_old_heuristics = smp.flag_old_heuristics;
     let field = smp.field.clone();

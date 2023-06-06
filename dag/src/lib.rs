@@ -421,11 +421,7 @@ impl DAG {
     }
 
     pub fn get_node(&self, id: usize) -> Option<&Node> {
-        if id < self.nodes.len() {
-            Some(&self.nodes[id])
-        } else {
-            None
-        }
+        (id < self.nodes.len()).then(|| &self.nodes[id])
     }
 
     fn raw_find_id_connexion(&self, source: usize, target: usize) -> Option<usize> {
@@ -451,11 +447,7 @@ impl DAG {
     }
 
     pub fn get_edges(&self, node: usize) -> Option<&Vec<Edge>> {
-        if node < self.nodes.len() {
-            Some(&self.adjacency[node])
-        } else {
-            None
-        }
+        (node < self.nodes.len()).then(|| &self.adjacency[node])
     }
 
     pub fn constraint_analysis(&mut self) -> Result<ReportCollection, ReportCollection> {
