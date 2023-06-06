@@ -87,8 +87,7 @@ fn treat_statement(stmt: &mut Statement, context: &Context, reports: &mut Report
         treat_while(stmt, context, reports, flags, prime)
     } else if stmt.is_declaration(){
         treat_declaration(stmt, context, reports, flags, prime)
-    } else {
-    }
+    } 
 }
 
 fn treat_init_block(stmt: &mut Statement, context: &Context, reports: &mut ReportCollection, flags: FlagsExecution, prime: &String) {

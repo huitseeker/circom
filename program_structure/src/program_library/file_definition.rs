@@ -29,7 +29,7 @@ impl FileLibrary {
         self.files.line_index(file_id, start).map(|lines| { lines + 1 })
     }
     pub fn to_storage(&self) -> &FileStorage {
-        &self.get_files()
+        self.get_files()
     }
     fn get_files(&self) -> &FileStorage {
         &self.files

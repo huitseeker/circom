@@ -344,7 +344,7 @@ fn create_uniform_components(state: &mut State, triggers: &[Trigger], cluster: T
             number_of_cmp: compute_number_cmp(&symbol.dimensions),
             dimensions: symbol.dimensions,
             signal_offset_jump: offset_jump,
-	        component_offset_jump: component_offset_jump,
+	        component_offset_jump,
         }
         .allocate();
         state.code.push(creation_instr);
@@ -453,10 +453,10 @@ fn translate_if_then_else(stmt: Statement, state: &mut State, context: &Context)
     use Statement::IfThenElse;
     if let IfThenElse { meta, cond, if_case, else_case, .. } = stmt {
         let starts_at = context.files.get_line(meta.start, meta.get_file_id()).unwrap();
-        let main_program = std::mem::replace(&mut state.code, vec![]);
+        let main_program = std::mem::take(&mut state.code);
         let cond_translation = translate_expression(cond, state, context);
         translate_statement(*if_case, state, context);
-        let if_code = std::mem::replace(&mut state.code, vec![]);
+        let if_code = std::mem::take(&mut state.code);
         if let Option::Some(else_case) = else_case {
             translate_statement(*else_case, state, context);
         }
@@ -477,7 +477,7 @@ fn translate_while(stmt: Statement, state: &mut State, context: &Context) {
     use Statement::While;
     if let While { meta, cond, stmt, .. } = stmt {
         let starts_at = context.files.get_line(meta.start, meta.get_file_id()).unwrap();
-        let main_program = std::mem::replace(&mut state.code, vec![]);
+        let main_program = std::mem::take(&mut state.code);
         let cond_translation = translate_expression(cond, state, context);
         translate_statement(*stmt, state, context);
         let loop_code = std::mem::replace(&mut state.code, main_program);
@@ -496,7 +496,7 @@ fn translate_substitution(stmt: Statement, state: &mut State, context: &Context)
     use Statement::Substitution;
     if let Substitution { meta, var, access, rhe, .. } = stmt {
         debug_assert!(!meta.get_type_knowledge().is_component());
-        let def = SymbolDef { meta: meta.clone(), symbol: var, acc: access };
+        let def = SymbolDef { meta, symbol: var, acc: access };
         let str_info =
             StoreInfo { prc_symbol: ProcessedSymbol::new(def, state, context), src: rhe };
         let store_instruction = if str_info.src.is_call() {
@@ -523,7 +523,7 @@ fn translate_call_case(
     use Expression::Call;
     if let Call { id, args, .. } = info.src {
         let args_instr = translate_call_arguments(args, state, context);
-        info.prc_symbol.into_call_assign(id, args_instr, &state)
+        info.prc_symbol.into_call_assign(id, args_instr, state)
     } else {
         unreachable!()
     }
@@ -791,7 +791,7 @@ fn translate_variable(
     if let Variable { meta, name, access, .. } = expression {
         let tag_access = check_tag_access(&name, &access, state);
         if tag_access.is_some(){
-            translate_number( Expression::Number(meta.clone(), tag_access.unwrap()), state, context)
+            translate_number( Expression::Number(meta, tag_access.unwrap()), state, context)
         } else{
             let def = SymbolDef { meta, symbol: name, acc: access };
             ProcessedSymbol::new(def, state, context).into_load(state)
@@ -954,10 +954,8 @@ impl ProcessedSymbol {
                     with_length = possible_length.iter().fold(1, |r, c| r * (*c));
                     is_first = false;
                 }
-                else{
-                    if with_length != possible_length.iter().fold(1, |r, c| r * (*c)){
-                        unreachable!("On development: Circom compiler does not accept for now the assignment of arrays of unknown sizes during the execution of loops");
-                    }
+                else if with_length != possible_length.iter().fold(1, |r, c| r * (*c)){
+                    unreachable!("On development: Circom compiler does not accept for now the assignment of arrays of unknown sizes during the execution of loops");
                 }
             } 
         }
@@ -1162,7 +1160,7 @@ fn indexing_instructions_filter(
             Value(mut v) if v.parse_as == ValueType::BigInt => {
                 v.parse_as = ValueType::U32;
                 let field = state.field_tracker.get_constant(v.value).unwrap();
-                v.value = usize::from_str_radix(field, 10).unwrap_or_else(|_| usize::MAX);
+                v.value = usize::from_str_radix(field, 10).unwrap_or(usize::MAX);
                 index_stack.push(v.allocate());
             }
             Compute(mut v) if v.op == OperatorType::Add => {
@@ -1192,7 +1190,7 @@ fn indexing_instructions_filter(
 
 fn fold(using: OperatorType, mut stack: Vec<InstructionPointer>, state: &State) -> InstructionPointer {
     let instruction = stack.pop().unwrap();
-    if stack.len() == 0 {
+    if stack.is_empty() {
         instruction
     } else {
         ComputeBucket {

@@ -117,7 +117,7 @@ impl IncludesGraph {
             (&node.path, node.custom_gates_pragma)
         };
         let new_path = {
-            let mut new_path = path.clone();
+            let mut new_path = path;
             new_path.push(from_path.clone());
             new_path
         };
@@ -149,7 +149,7 @@ impl IncludesGraph {
             .iter()
             .map(|file| -> String {
                 let file = format!("{}", file.display());
-                let (_, file) = file.rsplit_once("/").unwrap();
+                let (_, file) = file.rsplit_once('/').unwrap();
                 file.clone().to_string()
             })
             .collect::<Vec<String>>();

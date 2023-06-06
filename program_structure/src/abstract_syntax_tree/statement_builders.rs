@@ -7,7 +7,7 @@ pub fn build_conditional_block(
     if_case: Statement,
     else_case: Option<Statement>,
 ) -> Statement {
-    IfThenElse { meta, cond, else_case: else_case.map(|s| Box::new(s)), if_case: Box::new(if_case) }
+    IfThenElse { meta, cond, else_case: else_case.map(Box::new), if_case: Box::new(if_case) }
 }
 
 pub fn build_while_block(meta: Meta, cond: Expression, stmt: Statement) -> Statement {
@@ -81,7 +81,7 @@ pub fn build_assert(meta: Meta, arg: Expression) -> Statement {
 }
 
 pub fn build_mult_substitution(meta: Meta, lhe: Expression, op : AssignOp, rhe: Expression) -> Statement {
-    MultSubstitution { meta: meta.clone(), lhe, op, rhe }
+    MultSubstitution { meta, lhe, op, rhe }
 }
 
 pub fn build_anonymous_component_statement(meta: Meta, arg: Expression) -> Statement {

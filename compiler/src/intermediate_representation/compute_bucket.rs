@@ -347,7 +347,7 @@ impl WriteC for ComputeBucket {
             OperatorType::Eq(n) => {
                 let exp_aux_index = self.op_aux_no.to_string();
                 let operator = get_fr_op(self.op);
-                let result_ref = format!("&{}", expaux(exp_aux_index.clone()));
+                let result_ref = format!("&{}", expaux(exp_aux_index));
                 let mut arguments = vec![result_ref.clone()];
                 let operands_copy = operands.clone();
                 arguments.append(&mut operands);
@@ -361,9 +361,9 @@ impl WriteC for ComputeBucket {
                         operands.push(format!("{} + {}", operand, index_multiple_eq()));
                     }
                     arguments.append(&mut operands);
-                    compute_c.push(format!("{}; // line circom {}", build_call(operator.clone(), arguments),self.line.to_string()));
+                    compute_c.push(format!("{}; // line circom {}", build_call(operator, arguments),self.line.to_string()));
                     compute_c.push(format!("{}++;", index_multiple_eq()));
-                    compute_c.push(format!("}}"));
+                    compute_c.push("}".to_string());
                     
                 }
                 result = result_ref;
@@ -375,7 +375,7 @@ impl WriteC for ComputeBucket {
                 let exp_aux_index = self.op_aux_no.to_string();
                 // build assign
                 let operator = get_fr_op(self.op);
-                let result_ref = format!("&{}", expaux(exp_aux_index.clone()));
+                let result_ref = format!("&{}", expaux(exp_aux_index));
                 let mut arguments = vec![result_ref.clone()];
                 arguments.append(&mut operands);
                 compute_c.push(format!("{}; // line circom {}", build_call(operator, arguments),self.line.to_string()));

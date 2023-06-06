@@ -512,7 +512,7 @@ fn split_return(stmt: Statement, id: usize) -> ReturnSplit {
         let mut declaration_meta = meta.clone();
         let mut substitution_meta = meta.clone();
         let mut variable_meta = meta.clone();
-        let return_meta = meta.clone();
+        let return_meta = meta;
         declaration_meta.get_mut_memory_knowledge().set_concrete_dimensions(lengths.clone());
         declaration_meta.get_mut_type_knowledge().set_reduces_to(TypeReduction::Variable);
         substitution_meta.get_mut_type_knowledge().set_reduces_to(TypeReduction::Variable);
@@ -560,7 +560,7 @@ fn rhe_switch_case(stmt: Statement, stmts: &mut Vec<Statement>) {
                 meta: meta.clone(),
                 var: var.clone(),
                 access: access.clone(),
-                op: op.clone(),
+                op,
                 rhe: *if_true,
             };
             if_assigns.push(sub_if);

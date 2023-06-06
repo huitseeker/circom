@@ -61,10 +61,10 @@ impl WriteWasm for LoadBucket {
                 instructions.push(mul32());
                 match &self.address_type {
                     AddressType::Variable => {
-                        instructions.push(get_local(producer.get_lvar_tag()).to_string());
+                        instructions.push(get_local(producer.get_lvar_tag()));
                     }
                     AddressType::Signal => {
-                        instructions.push(get_local(producer.get_signal_start_tag()).to_string());
+                        instructions.push(get_local(producer.get_signal_start_tag()));
                     }
                     AddressType::SubcmpSignal { cmp_address, .. } => {
 			if producer.needs_comments() {
@@ -193,12 +193,12 @@ impl WriteC for LoadBucket {
                 location.produce_c(producer, parallel)
             } else if let LocationRule::Mapped { signal_code, indexes } = &self.src {
 		let mut map_prologue = vec![];
-		let sub_component_pos_in_memory = format!("{}[{}]",MY_SUBCOMPONENTS,cmp_index_ref.clone());
+		let sub_component_pos_in_memory = format!("{}[{}]",MY_SUBCOMPONENTS,cmp_index_ref);
 		let mut map_access = format!("{}->{}[{}].defs[{}].offset",
 					     circom_calc_wit(), template_ins_2_io_info(),
 					     template_id_in_component(sub_component_pos_in_memory.clone()),
 					     signal_code.to_string());
-		if indexes.len()>0 {
+		if !indexes.is_empty() {
 		    let (mut index_code_0, mut map_index) = indexes[0].produce_c(producer, parallel);
 		    map_prologue.append(&mut index_code_0);
 		    for i in 1..indexes.len() {
@@ -228,16 +228,16 @@ impl WriteC for LoadBucket {
 		if *is_output {
             if uniform_parallel_value.is_some(){
                 if uniform_parallel_value.unwrap(){
-                    prologue.push(format!("{{"));
-		            prologue.push(format!("int aux1 = {};",cmp_index_ref.clone()));
-		            prologue.push(format!("int aux2 = {};",src_index.clone()));
+                    prologue.push("{".to_string());
+		            prologue.push(format!("int aux1 = {};",cmp_index_ref));
+		            prologue.push(format!("int aux2 = {};",src_index));
                     // check each one of the outputs of the assignment, we add i to check them one by one
                     prologue.push(format!("for (int i = 0; i < {}; i++) {{",self.context.size));
-                    prologue.push(format!("ctx->numThreadMutex.lock();"));
-                    prologue.push(format!("ctx->numThread--;"));
+                    prologue.push("ctx->numThreadMutex.lock();".to_string());
+                    prologue.push("ctx->numThread--;".to_string());
                     //prologue.push(format!("printf(\"%i \\n\", ctx->numThread);"));
-                    prologue.push(format!("ctx->numThreadMutex.unlock();"));
-                    prologue.push(format!("ctx->ntcvs.notify_one();"));	 
+                    prologue.push("ctx->numThreadMutex.unlock();".to_string());
+                    prologue.push("ctx->ntcvs.notify_one();".to_string());	 
 		            prologue.push(format!(
                         "std::unique_lock<std::mutex> lk({}->componentMemory[{}[aux1]].mutexes[aux2 + i]);",
                         CIRCOM_CALC_WIT, MY_SUBCOMPONENTS)
@@ -249,10 +249,10 @@ impl WriteC for LoadBucket {
                     );
                     prologue.push(format!("std::unique_lock<std::mutex> lkt({}->numThreadMutex);",CIRCOM_CALC_WIT));
                     prologue.push(format!("{}->ntcvs.wait(lkt, [{}]() {{return {}->numThread <  {}->maxThread; }});",CIRCOM_CALC_WIT,CIRCOM_CALC_WIT,CIRCOM_CALC_WIT,CIRCOM_CALC_WIT));
-                    prologue.push(format!("ctx->numThread++;"));
+                    prologue.push("ctx->numThread++;".to_string());
                     //prologue.push(format!("printf(\"%i \\n\", ctx->numThread);"));
-                    prologue.push(format!("}}"));
-		            prologue.push(format!("}}"));
+                    prologue.push("}".to_string());
+		            prologue.push("}".to_string());
                 }
             }
             // Case we only know if it is parallel at execution
@@ -264,16 +264,16 @@ impl WriteC for LoadBucket {
                 ));
 
                 // case parallel
-                prologue.push(format!("{{"));
-		        prologue.push(format!("int aux1 = {};",cmp_index_ref.clone()));
-		        prologue.push(format!("int aux2 = {};",src_index.clone()));
+                prologue.push("{".to_string());
+		        prologue.push(format!("int aux1 = {};",cmp_index_ref));
+		        prologue.push(format!("int aux2 = {};",src_index));
 		        // check each one of the outputs of the assignment, we add i to check them one by one
                 prologue.push(format!("for (int i = 0; i < {}; i++) {{",self.context.size));
-                prologue.push(format!("ctx->numThreadMutex.lock();"));
-                prologue.push(format!("ctx->numThread--;"));
+                prologue.push("ctx->numThreadMutex.lock();".to_string());
+                prologue.push("ctx->numThread--;".to_string());
                 //prologue.push(format!("printf(\"%i \\n\", ctx->numThread);"));
-                prologue.push(format!("ctx->numThreadMutex.unlock();"));
-                prologue.push(format!("ctx->ntcvs.notify_one();"));	 
+                prologue.push("ctx->numThreadMutex.unlock();".to_string());
+                prologue.push("ctx->ntcvs.notify_one();".to_string());	 
 	            prologue.push(format!(
                         "std::unique_lock<std::mutex> lk({}->componentMemory[{}[aux1]].mutexes[aux2 + i]);",
                         CIRCOM_CALC_WIT, MY_SUBCOMPONENTS)
@@ -285,14 +285,14 @@ impl WriteC for LoadBucket {
                     );
                 prologue.push(format!("std::unique_lock<std::mutex> lkt({}->numThreadMutex);",CIRCOM_CALC_WIT));
                 prologue.push(format!("{}->ntcvs.wait(lkt, [{}]() {{return {}->numThread <  {}->maxThread; }});",CIRCOM_CALC_WIT,CIRCOM_CALC_WIT,CIRCOM_CALC_WIT,CIRCOM_CALC_WIT));
-                prologue.push(format!("ctx->numThread++;"));
+                prologue.push("ctx->numThread++;".to_string());
                 //prologue.push(format!("printf(\"%i \\n\", ctx->numThread);"));
-                prologue.push(format!("}}"));
-		        prologue.push(format!("}}"));
+                prologue.push("}".to_string());
+		        prologue.push("}".to_string());
                 
                 // end of case parallel, in case no parallel we do nothing
 
-                prologue.push(format!("}}"));
+                prologue.push("}".to_string());
             }
         }
                 let sub_cmp_start = format!(
